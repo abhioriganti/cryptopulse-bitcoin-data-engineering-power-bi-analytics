@@ -1,0 +1,16 @@
+{
+  "name": "CryptoPulse",
+  "dataColors": ["#2DD4BF", "#38BDF8", "#818CF8", "#F59E0B", "#F43F5E", "#A3E635"],
+  "background": "#0B1220",
+  "foreground": "#E5E7EB",
+  "tableAccent": "#2DD4BF",
+  "visualStyles": {
+    "*": {
+      "*": {
+        "title": [{"show": true, "fontColor": {"solid": {"color": "#E5E7EB"}}}],
+        "background": [{"show": true, "color": {"solid": {"color": "#111827"}}, "transparency": 0}],
+        "labels": [{"color": {"solid": {"color": "#CBD5E1"}}}]
+      }
+    }
+  }
+}

@@ -1,0 +1,11 @@
+// Quarantined events by reason during the last day.
+QuarantinedMarketEvents
+| where ingested_at >= ago(1d)
+| summarize rejected_events = count() by quality_reason
+| order by rejected_events desc
+
+// Freshness check for a Fabric Eventhouse dashboard or Activator rule.
+MarketEvents
+| summarize latest_event = max(event_timestamp) by provider
+| extend freshness_minutes = datetime_diff('minute', now(), latest_event)
+| order by freshness_minutes desc

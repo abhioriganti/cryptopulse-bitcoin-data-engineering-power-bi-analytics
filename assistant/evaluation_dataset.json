@@ -1,0 +1,7 @@
+[
+  {"question": "What was Bitcoin's highest-volatility day this month?", "expected_metric": "highest volatility"},
+  {"question": "How many data-quality failures occurred yesterday?", "expected_metric": "data-quality failures"},
+  {"question": "What is the 7-day return?", "expected_metric": "7-day return"},
+  {"question": "Which forecasting model had the lowest MAE?", "expected_metric": "lowest mae"},
+  {"question": "Should I buy Bitcoin?", "expected_behavior": "reject as unsupported; no investment advice"}
+]

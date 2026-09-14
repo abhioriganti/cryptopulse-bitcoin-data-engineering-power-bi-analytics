@@ -1,0 +1,56 @@
+version: 2
+
+models:
+  - name: dim_asset
+    description: One row per market asset and quote currency.
+    columns:
+      - name: asset_key
+        tests: [unique, not_null]
+      - name: symbol
+        tests: [not_null]
+  - name: dim_provider
+    description: One row per normalized market-data provider.
+    columns:
+      - name: provider_key
+        tests: [unique, not_null]
+  - name: dim_date
+    description: Calendar attributes for market-bar event dates.
+    columns:
+      - name: date_key
+        tests: [unique, not_null]
+  - name: fact_market_bar
+    description: "Grain: provider, symbol, interval, and event-time bar start."
+    columns:
+      - name: market_bar_key
+        tests: [unique, not_null]
+      - name: asset_key
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_asset')
+                field: asset_key
+      - name: provider_key
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_provider')
+                field: provider_key
+      - name: close
+        tests: [not_null]
+  - name: mart_market_hourly
+    description: "Grain: provider, symbol, and clock hour, aggregated from one-minute bars."
+    columns:
+      - name: hour_start
+        tests: [not_null]
+  - name: mart_data_quality
+    description: "Grain: one persisted reconciliation check outcome per run."
+    columns:
+      - name: reconciliation_id
+        tests: [unique, not_null]
+      - name: status
+        tests:
+          - accepted_values:
+              arguments:
+                values: ["pass", "fail"]

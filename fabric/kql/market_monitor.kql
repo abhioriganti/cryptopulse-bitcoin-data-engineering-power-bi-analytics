@@ -1,0 +1,19 @@
+// Latest normalized BTC-USD event by provider.
+MarketEvents
+| where symbol == "BTC-USD"
+| summarize arg_max(event_timestamp, *) by provider
+| project provider, event_timestamp, price, volume, event_type, schema_version
+
+// One-minute real-time OHLCV/VWAP view.
+MarketEvents
+| where symbol == "BTC-USD" and isnotnull(price)
+| summarize
+    open = arg_min(event_timestamp, price),
+    high = max(price),
+    low = min(price),
+    close = arg_max(event_timestamp, price),
+    volume = sum(volume),
+    trades = count(),
+    vwap = sum(price * volume) / sum(volume)
+  by bin(event_timestamp, 1m), provider, symbol
+| order by event_timestamp desc

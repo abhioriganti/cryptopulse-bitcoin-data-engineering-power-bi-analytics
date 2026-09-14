@@ -1,0 +1,25 @@
+{
+  "annotations": {"list": []},
+  "editable": true,
+  "panels": [
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [{"expr": "sum(rate(cryptopulse_api_requests_total[5m]))", "refId": "A"}],
+      "title": "API requests per second", "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [{"expr": "histogram_quantile(0.95, sum(rate(cryptopulse_api_request_duration_seconds_bucket[5m])) by (le))", "refId": "A"}],
+      "title": "API p95 latency (seconds)", "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [{"expr": "cryptopulse_serving_store_up", "refId": "A"}],
+      "title": "Serving store available", "type": "stat"
+    }
+  ],
+  "schemaVersion": 39,
+  "tags": ["cryptopulse", "platform"],
+  "title": "CryptoPulse API Overview",
+  "version": 1
+}

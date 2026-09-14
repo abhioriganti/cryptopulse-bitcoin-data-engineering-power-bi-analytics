@@ -1,0 +1,52 @@
+// Add these measures to a dedicated Measures table. Names assume the display names in powerbi/README.md.
+
+// Display folder: Market\Price
+Latest BTC Price =
+VAR LatestBar = CALCULATE(MAX('Fact Market Bar'[bar_start]), ALL('Fact Market Bar'))
+RETURN CALCULATE(MAX('Fact Market Bar'[close]), 'Fact Market Bar'[bar_start] = LatestBar)
+
+24H Return % =
+VAR LatestPrice = [Latest BTC Price]
+VAR StartPrice = CALCULATE(MAX('Fact Market Bar'[close]), DATEADD('Dim Date'[date], -1, DAY))
+RETURN DIVIDE(LatestPrice - StartPrice, StartPrice)
+
+7D Return % =
+VAR LatestPrice = [Latest BTC Price]
+VAR StartPrice = CALCULATE(MAX('Fact Market Bar'[close]), DATEADD('Dim Date'[date], -7, DAY))
+RETURN DIVIDE(LatestPrice - StartPrice, StartPrice)
+
+30D Return % =
+VAR LatestPrice = [Latest BTC Price]
+VAR StartPrice = CALCULATE(MAX('Fact Market Bar'[close]), DATEADD('Dim Date'[date], -30, DAY))
+RETURN DIVIDE(LatestPrice - StartPrice, StartPrice)
+
+SMA 7 = AVERAGEX(DATESINPERIOD('Dim Date'[date], MAX('Dim Date'[date]), -7, DAY), [Latest BTC Price])
+SMA 30 = AVERAGEX(DATESINPERIOD('Dim Date'[date], MAX('Dim Date'[date]), -30, DAY), [Latest BTC Price])
+
+// Display folder: Market\Volume and volatility
+24H Volume = CALCULATE(SUM('Fact Market Bar'[volume]), DATESINPERIOD('Dim Date'[date], MAX('Dim Date'[date]), -1, DAY))
+Average Daily Volume = AVERAGEX(VALUES('Dim Date'[date]), CALCULATE(SUM('Fact Market Bar'[volume])))
+VWAP = DIVIDE(SUMX('Fact Market Bar', 'Fact Market Bar'[vwap] * 'Fact Market Bar'[volume]), SUM('Fact Market Bar'[volume]))
+7D Realized Volatility = STDEVX.P(DATESINPERIOD('Dim Date'[date], MAX('Dim Date'[date]), -7, DAY), CALCULATE(MAX('Fact Market Bar'[simple_return])))
+30D Realized Volatility = STDEVX.P(DATESINPERIOD('Dim Date'[date], MAX('Dim Date'[date]), -30, DAY), CALCULATE(MAX('Fact Market Bar'[simple_return])))
+Maximum Drawdown =
+VAR BarsWithPeak =
+    ADDCOLUMNS(
+        ALLSELECTED('Fact Market Bar'),
+        "Running Peak",
+            VAR CurrentBar = 'Fact Market Bar'[bar_start]
+            RETURN CALCULATE(MAX('Fact Market Bar'[close]), FILTER(ALLSELECTED('Fact Market Bar'), 'Fact Market Bar'[bar_start] <= CurrentBar))
+    )
+RETURN MINX(BarsWithPeak, DIVIDE('Fact Market Bar'[close] - [Running Peak], [Running Peak]))
+
+// Display folder: Forecasting
+Forecast MAE = AVERAGEX('Forecasts', ABS('Forecasts'[actual] - 'Forecasts'[predicted]))
+Forecast RMSE = SQRT(AVERAGEX('Forecasts', POWER('Forecasts'[actual] - 'Forecasts'[predicted], 2)))
+Forecast Error % = DIVIDE(AVERAGEX('Forecasts', ABS('Forecasts'[actual] - 'Forecasts'[predicted])), AVERAGE('Forecasts'[actual]))
+
+// Display folder: Reliability
+Anomaly Count = COUNTROWS('Anomalies')
+Data Freshness Minutes = DATEDIFF(MAX('Fact Market Bar'[bar_start]), NOW(), MINUTE)
+Pipeline Success % = DIVIDE(CALCULATE(COUNTROWS('Mart Data Quality'), 'Mart Data Quality'[status] = "pass"), COUNTROWS('Mart Data Quality'))
+Rejected Record Count = CALCULATE(COUNTROWS('Mart Data Quality'), 'Mart Data Quality'[status] = "fail")
+Data Quality Pass % = [Pipeline Success %]

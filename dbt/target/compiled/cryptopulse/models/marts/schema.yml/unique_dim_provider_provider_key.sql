@@ -1,0 +1,14 @@
+
+    
+    
+
+select
+    provider_key as unique_field,
+    count(*) as n_records
+
+from "cryptopulse"."analytics_analytics"."dim_provider"
+where provider_key is not null
+group by provider_key
+having count(*) > 1
+
+
