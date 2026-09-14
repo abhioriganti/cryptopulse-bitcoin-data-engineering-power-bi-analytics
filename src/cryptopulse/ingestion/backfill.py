@@ -33,25 +33,33 @@ def finalized_bar_rows(events: list[MarketEvent], interval: str) -> list[dict[st
     interval bars.  The raw payload remains in Bronze for replay/audit; this path
     only makes the same validated source bars queryable by local dbt and Power BI.
     """
+    return [finalized_bar_row(event, interval) for event in events]
+
+
+def finalized_bar_row(event: MarketEvent, interval: str) -> dict[str, object]:
+    """Convert one validated completed source candle to the serving-table grain."""
+    if None in (event.open, event.high, event.low, event.close):
+        raise ValueError("historical serving rows require complete OHLC values")
+    assert event.open is not None
+    assert event.high is not None
+    assert event.low is not None
+    assert event.close is not None
     duration = INTERVAL_DURATIONS[interval]
-    return [
-        {
-            "provider": event.provider,
-            "symbol": event.symbol,
-            "currency": event.currency,
-            "interval": "1 hour",
-            "bar_start": event.event_timestamp,
-            "bar_end": event.event_timestamp + duration,
-            "open": float(event.open),
-            "high": float(event.high),
-            "low": float(event.low),
-            "close": float(event.close),
-            "volume": float(event.volume or 0),
-            "trade_count": int(event.trade_count or 0),
-            "vwap": float(event.close),
-        }
-        for event in events
-    ]
+    return {
+        "provider": event.provider,
+        "symbol": event.symbol,
+        "currency": event.currency,
+        "interval": "1 hour",
+        "bar_start": event.event_timestamp,
+        "bar_end": event.event_timestamp + duration,
+        "open": float(event.open),
+        "high": float(event.high),
+        "low": float(event.low),
+        "close": float(event.close),
+        "volume": float(event.volume or 0),
+        "trade_count": int(event.trade_count or 0),
+        "vwap": float(event.close),
+    }
 
 
 async def run_backfill(

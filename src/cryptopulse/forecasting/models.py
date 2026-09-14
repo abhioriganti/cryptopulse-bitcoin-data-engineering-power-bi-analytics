@@ -4,7 +4,7 @@
 def arima_forecast(train: list[float], horizon: int) -> list[float]:
     """Fit ARIMA only on the chronological training window."""
     try:
-        from statsmodels.tsa.arima.model import ARIMA
+        from statsmodels.tsa.arima.model import ARIMA  # type: ignore[import-not-found]
     except ImportError as error:
         raise RuntimeError("Install cryptopulse[ml] with statsmodels to run ARIMA") from error
     return list(ARIMA(train, order=(1, 1, 1)).fit().forecast(steps=horizon))

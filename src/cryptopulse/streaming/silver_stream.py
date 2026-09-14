@@ -1,5 +1,6 @@
 """Checkpointed Redpanda-to-Delta Bronze/Silver Structured Streaming job."""
 
+from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any
 
@@ -42,6 +43,15 @@ class StreamingPaths:
     quarantine: str
     aggregates_root: str
     checkpoint_root: str
+
+
+def gold_batch_writer(target_path: str) -> Callable[[DataFrame, int], None]:
+    """Bind a Gold target path to Spark's typed foreach-batch callback."""
+
+    def write_batch(batch: DataFrame, batch_id: int) -> None:
+        upsert_market_bars(batch, batch_id, target_path)
+
+    return write_batch
 
 
 def kafka_source(spark: SparkSession, bootstrap_servers: str, topic: str) -> DataFrame:
@@ -144,11 +154,7 @@ def start_streams(
             .writeStream.outputMode("update")
             .option("checkpointLocation", f"{paths.checkpoint_root}/bars-{interval}")
             .trigger(processingTime=trigger_interval)
-            .foreachBatch(
-                lambda batch, batch_id, target=f"{paths.aggregates_root}/interval={interval}": (
-                    upsert_market_bars(batch, batch_id, target)
-                )
-            )
+            .foreachBatch(gold_batch_writer(f"{paths.aggregates_root}/interval={interval}"))
             .start()
         )
         for interval in ("1 minute", "5 minutes", "15 minutes", "1 hour")
