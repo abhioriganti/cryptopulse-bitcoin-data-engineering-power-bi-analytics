@@ -63,5 +63,9 @@ strict = true
 warn_unreachable = true
 mypy_path = "src"
 
+[[tool.mypy.overrides]]
+module = ["statsmodels.*"]
+ignore_missing_imports = true
+
 [tool.coverage.run]
 source = ["cryptopulse"]
