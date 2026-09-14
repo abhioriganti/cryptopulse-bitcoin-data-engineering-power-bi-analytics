@@ -1,4 +1,4 @@
-# CryptoPulse: Bitcoin Market Intelligence Platform
+# CryptoPulse: Bitcoin Data Engineering and Power BI Analytics
 
 CryptoPulse is a local-first data engineering and analytics capstone for Bitcoin/USD market data.
 It demonstrates asynchronous ingestion, Redpanda, Delta Bronze/Silver/Gold processing, dbt
@@ -7,6 +7,14 @@ serving layer, Power BI semantic-model assets, and optional Microsoft Fabric map
 
 It is designed with production-oriented patterns, but no unsupported production-scale, uptime,
 throughput, trading-performance, or profitability claim is made.
+
+## Power BI Portfolio Focus
+
+Power BI is a central delivery layer for this project. The repository includes a documented
+star-schema semantic model, DAX measures, a professional theme, and manually validated report
+pages for executive market monitoring, data quality and reliability, forecasting, and volatility
+analysis. The dashboards consume curated PostgreSQL/dbt analytics models rather than legacy Power
+BI push or streaming datasets.
 
 ## Architecture
 
